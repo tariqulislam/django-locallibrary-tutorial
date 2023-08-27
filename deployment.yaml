@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-app
+  labels:
+    app: django
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: django
+  template:
+    metadata:
+      labels:
+        app: django
+    spec:
+      containers:
+        - image: tariqulislam/mdn-test-library-docker
+          name: "django"
+          command: ["sh", "-c"]
+          args:
+            - |
+               /bin/sh <<'EOF'
+                  python manage.py createsuperuser --noinput
+                  python manage.py runserver 0.0.0.0:8000
+                  exit 123
+               EOF
+          envFrom:
+            - configMapRef:
+                name: config          
+          env:
+            - name: DJANGO_SUPERUSER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: admin-user-pass
+                  key: DJANGO_SUPERUSER_USERNAME
+            - name: DJANGO_SUPERUSER_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: admin-user-pass
+                  key: DJANGO_SUPERUSER_EMAIL
+            - name: DJANGO_SUPERUSER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: admin-user-pass
+                  key: DJANGO_SUPERUSER_PASSWORD
+
+          imagePullPolicy: "IfNotPresent"
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8000
