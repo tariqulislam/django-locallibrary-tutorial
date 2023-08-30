@@ -1,0 +1,4 @@
+appName: django
+
+service:
+  port: 8000

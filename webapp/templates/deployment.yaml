@@ -3,20 +3,20 @@ kind: Deployment
 metadata:
   name: django-app
   labels:
-    app: django
+    app: {{ .Values.appName }}
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: django
+      app: {{ .Values.appName }}
   template:
     metadata:
       labels:
-        app: django
+        app: {{ .Values.appName }}
     spec:
       containers:
         - image: tariqulislam/mdn-test-library-docker
-          name: "django"
+          name: {{ .Values.appName }}
           command: ["sh", "-c"]
           args:
             - |
@@ -27,7 +27,7 @@ spec:
                EOF
           envFrom:
             - configMapRef:
-                name: config          
+                name: django-config-map          
           env:
             - name: DJANGO_SUPERUSER_USERNAME
               valueFrom:
@@ -51,4 +51,4 @@ spec:
               memory: "128Mi"
               cpu: "500m"
           ports:
-            - containerPort: 8000
+            - containerPort: {{ .Values.service.port }}
